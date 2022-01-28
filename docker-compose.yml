@@ -1,0 +1,14 @@
+version: "3"
+
+services: 
+    app:
+        build:
+            context: .
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./app:/app #maps our app file to the docker image app file
+        command: > # > means that theres many commands and we are going to separate them
+            sh -c "python manage.py runserver 0.0.0.0"
+            
+
