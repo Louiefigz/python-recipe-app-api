@@ -9,15 +9,18 @@ services:
         volumes:
             - ./app:/app #maps our app file to the docker image app file
         command: > # > means that theres many commands and we are going to separate them
-            sh -c "python manage.py runserver 0.0.0.0"
+            sh -c "python manage.py runserver 0.0.0.0:5432"
         environment:
             - DB_HOST=db
             - DB_NAME=app
             - DB_USER=postgres
-            - DB_PASS=secretpassword
+            - DB_PASS=supersecretpassword
+        depends_on:
+            - db
     db:
         image: postgres:13.6-alpine
         environment:
+            - "POSTGRES_HOST_AUTH_METHOD=trust"
             - POSTGRES_DB=app
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=supersecretpassword

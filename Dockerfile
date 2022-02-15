@@ -4,6 +4,7 @@ MAINTAINER Aaron
 
 ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt /requirements.txt
+ENV PORT 8080
 # must add this DB dependency when using postgres. It must be added before the pip install
 RUN apk add --update --no-cache postgresql-client
 RUN apk add --update --no-cache --virtual .tmp-build-deps \
