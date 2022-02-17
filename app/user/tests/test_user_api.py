@@ -31,7 +31,7 @@ class PublicUserApiTests(TestCase):
         # If the above really created the user, it should be in the res.data
         user = get_user_model().objects.get(**res.data)
 
-        print('this is the user', user.check_password)
+        # print('this is the user', user.check_password)
         self.assertTrue(user.check_password(payload['password']))
         # making sure we do not send the password
         self.assertNotIn('password', res.data)
@@ -66,9 +66,8 @@ class PublicUserApiTests(TestCase):
             'password': 'testpass'
         }
         create_user(**payload)
-        print('Line 68')
         res = self.client.post(TOKEN_URL, payload)
-        print("TOKEN?", res.data)
+        # print("TOKEN?", res.data)
         self.assertIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -104,6 +103,54 @@ class PublicUserApiTests(TestCase):
         self.assertNotIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
     
-  
+    def test_retreive_user_unathorized(self):
+        # Test that authentication is required for users
+        res = self.client.get(ME_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED) 
+    
+class PrivateUserApiTests(TestCase):
+    # Test API requests that require authentication
+    def setUp(self):
+        payload = {
+            'email':'test@gmail.com',
+            'password': 'testpass',
+            'name': 'test name'
+        }
+        self.user = create_user(**payload)
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_retrieve_profile_success(self):
+        # Test retrieving profile for loggined in user
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, {
+            'name': self.user.name,
+            'email': self.user.email
+        })
+    
+    def test_post_me_not_allowed(self):
+        # Test that POST is not allowed on the me url 
+        res = self.client.post(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    def test_update_user_profile(self):
+        # Test Updating the user profile for authenticaled User
+        payload = {
+            'name': 'new name', 
+            'email':'test@gmail.com',
+            'password': 'newpass123'
+        }
+        # this could also be a 'put' instead of 'patch'
+        res = self.client.patch(ME_URL, payload)
+        # print('Self.user:   ', dir(self.user))
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.name, payload['name'])
+        self.assertTrue(self.user.check_password(payload['password']))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
 
         
