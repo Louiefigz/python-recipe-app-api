@@ -26,3 +26,11 @@ docker-compose --verbose up
 
 Run one test example:
 docker-compose run app sh -c "python3 manage.py test PublicUserApiTests.test_create_token_for_user && flake8"
+
+Start the Django Shell:
+
+python manage.py shell
+
+Password for Admin: 
+email, 
+password = Awesome1
